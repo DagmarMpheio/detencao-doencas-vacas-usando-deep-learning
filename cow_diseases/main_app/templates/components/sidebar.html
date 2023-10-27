@@ -1,0 +1,89 @@
+{% load static%}
+
+<!-- Sidebar -->
+<div class="sidebar">
+			
+    <div class="sidebar-background"></div>
+    <div class="sidebar-wrapper scrollbar-inner">
+        <div class="sidebar-content">
+            <div class="user">
+                <div class="avatar-sm float-left mr-2">
+                    <img src="{% static 'assets/img/profile.jpg' %}" alt="..." class="avatar-img rounded-circle">
+                </div>
+                <div class="info">
+                    <a data-toggle="collapse" href="#collapseExample" aria-expanded="true">
+                        <span>
+                            {{user.first_name}} {{user.last_name}}
+                            {% if user.is_superuser == 1%}
+                                <span class="user-level">Administrator</span>
+                            {% else%}
+                                <span class="user-level">Veterinário (a)</span>
+                            {% endif %}
+                            <span class="caret"></span>
+                        </span>
+                    </a>
+                    <div class="clearfix"></div>
+
+                    <div class="collapse in" id="collapseExample">
+                        <ul class="nav">
+                            <li>
+                                <a href="{% url 'profile' %}">
+                                    <span class="link-collapse">Meu Perfil</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'edit-profile' %}">
+                                    <span class="link-collapse">Editar Perfil</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!--MOSTRAR LINK ACTIVO-->
+            {% with request.resolver_match.url_name as url_name %}
+                <ul class="nav">
+                    <li class="nav-item {% if url_name == 'index'%} active {% endif %}">
+                        <a href="{% url 'index' %}">
+                            <i class="fas fa-home"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li class="nav-section">
+                        <span class="sidebar-mini-icon">
+                            <i class="fa fa-ellipsis-h"></i>
+                        </span>
+                        <h4 class="text-section">Detenção</h4>
+                    </li>
+                    <li class="nav-item {% if url_name == 'consultas' or url_name == 'consulta-create' or url_name == 'consulta-details' or url_name == 'reports' %} active {% endif %}">
+                        <a data-toggle="collapse" href="#base">
+                            <i class="fas fa-layer-group"></i>
+                            <p>Doenças de Vacas</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="base">
+                            <ul class="nav nav-collapse">
+                                <li>
+                                    <a href="{% url 'consulta-create' %}">
+                                        <span class="sub-item">Nova Consulta</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'consultas' %}">
+                                        <span class="sub-item">Consultas</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'reports' %}">
+                                        <span class="sub-item">Relatório</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            {% endwith %}
+        </div>
+    </div>
+</div>
+<!-- End Sidebar -->

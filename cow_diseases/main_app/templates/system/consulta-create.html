@@ -1,0 +1,16 @@
+{% extends "layout.html" %} 
+{% block title %} Nova Consulta {% endblock title%}
+{% block body %}
+<div class="page-inner">
+  <div class="page-header">
+    <h4 class="page-title">Nova Consulta</h4>
+  </div>
+  <div class="page-category">Starter Description</div>
+    <form action="{% url 'consulta-create' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="text" name="raca"/>
+        <input type="file" name="imagem"/>
+        <input type="submit" value="Classificar">
+    </form>
+</div>
+{% endblock %}

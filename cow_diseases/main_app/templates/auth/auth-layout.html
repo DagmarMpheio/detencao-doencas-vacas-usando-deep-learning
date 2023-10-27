@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    {% load static%}
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cow Diseases - {% block title %}{% endblock %}</title>
+    <link rel="shortcut icon" href="{% static 'img/logo.png' %}" />
+    <!-- CSS only -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/fontawesome/css/fontawesome.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'css/fontawesome/css/all.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'css/animate.min.css' %}" rel="stylesheet" />
+</head>
+<body>
+    {% block body %} {% endblock %}
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
