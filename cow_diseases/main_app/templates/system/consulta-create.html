@@ -1,16 +1,68 @@
 {% extends "layout.html" %} 
+
 {% block title %} Nova Consulta {% endblock title%}
+
+{% load static%}
+
 {% block body %}
-<div class="page-inner">
-  <div class="page-header">
-    <h4 class="page-title">Nova Consulta</h4>
+  <div class="page-inner">
+    <div class="page-header">
+      <h4 class="page-title">Nova Consulta</h4>
+      <ul class="breadcrumbs">
+        <li class="nav-home">
+          <a href="{% url 'index' %}">
+            <i class="flaticon-home"></i>
+          </a>
+        </li>
+        <li class="separator">
+          <i class="flaticon-right-arrow"></i>
+        </li>
+        <li class="nav-item">
+          <a href="{% url 'consultas' %}">Consultas</a>
+        </li>
+        <li class="separator">
+          <i class="flaticon-right-arrow"></i>
+        </li>
+        <li class="nav-item">
+          <a href="{% url 'consulta-create' %}">Nova Consulta</a>
+        </li>
+      </ul>
+    </div>
+    <div class="row">
+        <div class="col-lg-8">
+          <div class="card">
+            <form action="{% url 'consulta-create' %}" method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+              <div class="card-header">
+                <div class="card-title">Nova Consulta</div>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label for="raca">Raça do Gado</label>
+                  <input type="text" name="raca" class="form-control" id="raca" placeholder="Raça do Gado Bovino" required>
+                </div>
+                <div class="form-group">
+                  <label for="password">Imagem</label>
+                  <div class="input-file input-file-image">
+                    <img class="img-upload-preview" width="150" src="{% static 'img/150x150.png' %}" alt="preview">
+                    <input type="file" class="form-control form-control-file" id="imagem" name="imagem" accept="image/*" required="">
+                    <label for="imagem" class="  label-input-file btn btn-default btn-round">
+                      <span class="btn-label">
+                        <i class="fa fa-file-image"></i>
+                      </span>
+                      Escolher Imagem
+                    </label>
+                  </div>
+                </div>
+              
+              </div>
+              <div class="card-action">
+                <button class="btn btn-success" type="submit">Fazer Previsão</button>
+                <button class="btn btn-danger">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+    </div>
   </div>
-  <div class="page-category">Starter Description</div>
-    <form action="{% url 'consulta-create' %}" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="text" name="raca"/>
-        <input type="file" name="imagem"/>
-        <input type="submit" value="Classificar">
-    </form>
-</div>
 {% endblock %}

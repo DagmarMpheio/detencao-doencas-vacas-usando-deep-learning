@@ -3,4 +3,29 @@
 {% block title %} Relatórios {% endblock title%} 
 
 {% block body %}
+    <div class="page-inner">
+        <div class="page-header">
+            <h4 class="page-title">Relatórios</h4>
+            <ul class="breadcrumbs">
+              <li class="nav-home">
+                <a href="{% url 'index' %}">
+                  <i class="flaticon-home"></i>
+                </a>
+              </li>
+              <li class="separator">
+                <i class="flaticon-right-arrow"></i>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'consultas' %}">Consultas</a>
+              </li>
+              <li class="separator">
+                <i class="flaticon-right-arrow"></i>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'reports' %}">Relatórios</a>
+              </li>
+            </ul>
+          </div>
+        <div class="page-category">Starter Description</div>
+    </div>
 {% endblock %}

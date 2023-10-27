@@ -2,5 +2,107 @@
 
 {% block title %} Detalhes da Consulta {% endblock title%} 
 
+{% load static%}
+
 {% block body %}
+    <div class="page-inner">
+        <div class="page-header">
+            <h4 class="page-title">Detalhes da Consultas</h4>
+            <ul class="breadcrumbs">
+              <li class="nav-home">
+                <a href="{% url 'index' %}">
+                  <i class="flaticon-home"></i>
+                </a>
+              </li>
+              <li class="separator">
+                <i class="flaticon-right-arrow"></i>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'consultas' %}">Consultas</a>
+              </li>
+              <li class="separator">
+                <i class="flaticon-right-arrow"></i>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'consulta-details' consulta.id %}">Detalhes da Consultas</a>
+              </li>
+            </ul>
+          </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card card-post card-round">
+                    <img class="card-img-top" src="/static/detencao-img/{{consulta.imagem}}" alt="Imagem da Detectada" height="250" width="100%">
+                    <div class="card-body">
+                        <div class="separator-solid"></div>
+                        <div class="px-3">
+                            <div class="row d-flex justify-content-between">
+                                <p class="card-category text-success mb-1 fw-bold">Detalhes</p>
+                                <p class="card-category text-success mb-1">{{consulta.created_at | date:"F j, Y"}}</p>
+                            </div>
+                        </div>
+                        <h3 class="card-title">
+                            {{consulta.doenca}}
+                        </h3>
+                        <p class="card-text">{{descricao}}</p>
+
+                        <!-- Collapse 1 -->
+                        <div class="col-lg-12">
+                            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse1" aria-expanded="false">
+                                Factores de Risco <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="collapse" id="collapse1">
+                                <ul class="list-disc pl-6">
+                                    {% for factor in factores %}
+                                        <li class="card-text">{{ factor }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <!-- Collapse 2 -->
+                            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse2" aria-expanded="false">
+                                Formas de Tratamento ou Prevenção <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="collapse" id="collapse2">
+                                <ul class="list-disc pl-6">
+                                    {% for tratamento in tratamentos %}
+                                        <li class="card-text">{{ tratamento }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- probabilidade da previsao -->
+                        <div class="card card-success bg-success-gradient" style="height: 140px !important;">
+                            <div class="card-body">
+                                <h4 class="mb-1 fw-bold">Probabilidade</h4>
+                                <div id="task-complete" class="chart-circle mt-2 mb-2"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+    <script>
+        // Cicle Chart
+        Circles.create({
+            id:           'task-complete',
+            radius:       40,
+            value:        {{ consulta.probabilidade }},
+            maxValue:     100,
+            width:        5,
+            text:         function(value){return value + '%';},
+            colors:       ['#2FB834', '#fff'],
+            duration:     400,
+            wrpClass:     'circles-wrp',
+            textClass:    'circles-text',
+            styleWrapper: true,
+            styleText:    true
+        })
+    </script>
 {% endblock %}

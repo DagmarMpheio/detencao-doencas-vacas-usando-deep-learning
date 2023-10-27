@@ -1,6 +1,91 @@
-{% extends "layout.html" %} 
+{% extends "layout.html" %} {% block title %} Consultas {% endblock title%}
+{%block body %}
+<div class="page-inner">
+  <div class="page-header">
+    <h4 class="page-title">Consultas</h4>
+    <ul class="breadcrumbs">
+      <li class="nav-home">
+        <a href="{% url 'index' %}">
+          <i class="flaticon-home"></i>
+        </a>
+      </li>
+      <li class="separator">
+        <i class="flaticon-right-arrow"></i>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'consultas' %}">Consultas</a>
+      </li>
+    </ul>
+  </div>
+  <div class="row">
+    <div class="col-lg-8">
 
-{% block title %} Consultas {% endblock title%} 
+		{% if messages %}
+			{% for message in messages %}
+				{% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+					<!--SUCCESS MESSAGE-->
+					<div class="alert alert-success">
+						{{message}}
+					</div>
+				{% endif %}
 
-{% block body %}
+				{% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+					<!--ERROR MESSAGE-->
+					<div class="alert alert-danger">
+						{{message}}
+					</div>
+				{% endif %}
+			{% endfor %} 
+		{% endif %}
+
+      {% if not consultas %}
+      <div class="alert alert-danger">
+        Parece que ainda não realizou alguma consulta.
+      </div>
+      {% else %}
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Lista de Consultas</div>
+        </div>
+        <div class="card-body table-responsive">
+          <table class="table table-head-bg-success">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Raça</th>
+                <th scope="col">Previsão</th>
+                <th scope="col">Probabilidade</th>
+                <th scope="col">Data</th>
+                <th scope="col">Operações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for consulta in consultas %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ consulta.raca }}</td>
+                <td>{{ consulta.doenca }}</td>
+                <td>{{ consulta.probabilidade }} %</td>
+                <td>{{ consulta.created_at | date:"F j, Y" }}</td>
+                <td>
+                  <div class="row">
+                    <a href="{% url 'consulta-details' consulta.id %}" title="Detalhes" class="btn btn-icon btn-round btn-warning mx-2" style="display: flex; justify-content: center; align-items: center;">
+                      <i class="fa fa-info"></i>
+                    </a>
+                    <a href="{% url 'consulta-delete' consulta.id %}" title="Excluir" type="button" class="btn btn-icon btn-round btn-danger" style="display: flex; justify-content: center; align-items: center;">
+                      <i class="fa fa-trash"></i>
+                    </a>
+                  </div>
+				        </td>
+				
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
 {% endblock %}

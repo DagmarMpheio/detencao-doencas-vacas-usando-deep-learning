@@ -2,11 +2,56 @@
 
 {% block title %} Dashboard {% endblock title%} 
 
-{% block body %}
+{%block body %}
 <div class="page-inner">
-    <div class="page-header">
-        <h4 class="page-title">Starter Template</h4>
+  <div class="page-header">
+    <h4 class="page-title">Dashboard</h4>
+    <ul class="breadcrumbs">
+      <li class="nav-home">
+        <a href="{% url 'index' %}">
+          <i class="flaticon-home"></i>
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card card-success card-annoucement card-round">
+        <div class="card-body text-center">
+          <div class="card-opening" id="greeting"></div>
+          <div class="card-desc">
+            Sua paixão pela saúde e bem-estar do rebanho é inestimável. 
+            Estamos ansiosos para aproveitar sua experiência e conhecimento para garantir a saúde e o sucesso de nossos bovinos. 
+            Juntos, promoveremos o cuidado de qualidade que nosso gado merece.
+          </div>
+          <div class="card-detail">
+            <a href="{% url 'consultas' %}" class="btn btn-light btn-rounded">Ver Consultas <i class="fa fa-arrow-right"></i></a>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="page-category">Starter Description</div>
+  </div>
 </div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // Obtém a data atual
+        var currentTime = new Date();
+        var currentHour = currentTime.getHours();
+        
+        // Se você quiser usar saudações em diferentes horários do dia
+        var greeting;
+        if (currentHour < 12) {
+            greeting = "Bom dia";
+        } else if (currentHour < 18) {
+            greeting = "Boa tarde";
+        } else {
+            greeting = "Boa noite";
+        }
+        
+        // Insere a saudação na div
+        document.getElementById("greeting").textContent = "Olá, "+greeting + " {{user.first_name}} {{user.last_name}}";
+    </script>
 {% endblock %}
