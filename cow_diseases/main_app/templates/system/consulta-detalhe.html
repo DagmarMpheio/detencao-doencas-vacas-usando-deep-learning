@@ -45,29 +45,31 @@
                         </h3>
                         <p class="card-text">{{descricao}}</p>
 
-                        <!-- Collapse 1 -->
-                        <div class="col-lg-12">
-                            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse1" aria-expanded="false">
-                                Factores de Risco <i class="fas fa-chevron-down"></i>
-                            </button>
-                            <div class="collapse" id="collapse1">
-                                <ul class="list-disc pl-6">
-                                    {% for factor in factores %}
-                                        <li class="card-text">{{ factor }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
+                        <div class="row">
+                            <div class="row col-lg-11">
+                                <!-- Collapse 1 -->
+                                <button class="btn btn-link btn-success" type="button" data-toggle="collapse" data-target="#collapse1" aria-expanded="false">
+                                    Factores de Risco <i class="fas fa-chevron-down"></i>
+                                </button>
+                                <div class="collapse" id="collapse1">
+                                    <ul class="list-disc pl-6">
+                                        {% for factor in factores %}
+                                            <li class="card-text">{{ factor }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
 
-                            <!-- Collapse 2 -->
-                            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse2" aria-expanded="false">
-                                Formas de Tratamento ou Prevenção <i class="fas fa-chevron-down"></i>
-                            </button>
-                            <div class="collapse" id="collapse2">
-                                <ul class="list-disc pl-6">
-                                    {% for tratamento in tratamentos %}
-                                        <li class="card-text">{{ tratamento }}</li>
-                                    {% endfor %}
-                                </ul>
+                                <!-- Collapse 2 -->
+                                <button class="btn btn-link btn-success" type="button" data-toggle="collapse" data-target="#collapse2" aria-expanded="false">
+                                    Formas de Tratamento ou Prevenção <i class="fas fa-chevron-down"></i>
+                                </button>
+                                <div class="collapse" id="collapse2">
+                                    <ul class="list-disc pl-6">
+                                        {% for tratamento in tratamentos %}
+                                            <li class="card-text">{{ tratamento }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                         
