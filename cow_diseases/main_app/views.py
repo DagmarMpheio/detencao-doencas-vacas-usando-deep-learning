@@ -33,7 +33,7 @@ import json
 import random
 from datetime import datetime
 
-#paginacao
+# paginacao
 from django.core.paginator import Paginator
 
 # Create your views here.
@@ -241,12 +241,12 @@ def profile(request):
     else:
         if user.consultas.all().count() > 0:
             numConsultas = user.consultas.all().count()
-    
+
     form = UserForm(initial={'first_name': user.first_name,
-                    'last_name': user.last_name, 'email': user.email,"telefone":user.telefone,
-                    "data_nascimento":user.data_nascimento,"genero":user.genero,"endereco":user.endereco,"bio":user.bio
-        })
-    
+                    'last_name': user.last_name, 'email': user.email, "telefone": user.telefone,
+                             "data_nascimento": user.data_nascimento, "genero": user.genero, "endereco": user.endereco, "bio": user.bio
+                             })
+
     if request.method == "POST":
 
         form = UserForm(request.POST, instance=user)
@@ -263,7 +263,7 @@ def profile(request):
                 messages.error(request, 'Algo ocorreu mal\nErro: {}'.format(e))
                 return redirect('/profile')
 
-    return render(request, "user/profile.html", {'numConsultas': numConsultas, 'numUsers':numUsers, 'form':form})
+    return render(request, "user/profile.html", {'numConsultas': numConsultas, 'numUsers': numUsers, 'form': form})
 
 
 # metodo de pesquisa
@@ -281,14 +281,14 @@ def search_view(request):
     results = consultas.filter(raca__icontains=query)
     resultTotal = results.count()
 
-    #usar paginacao
+    # usar paginacao
     results_por_pagina = 5  # número de consultas por página
     paginator = Paginator(results, results_por_pagina)
 
     pagina = request.GET.get('pagina')
     results_da_pagina = paginator.get_page(pagina)
 
-    return render(request, "system/search-results.html", {'query':query,'results': results_da_pagina, 'resultTotal': resultTotal})
+    return render(request, "system/search-results.html", {'query': query, 'results': results_da_pagina, 'resultTotal': resultTotal})
 
 
 """ Extensões permitidas """
@@ -308,13 +308,16 @@ def consultas(request):
     if request.method == "GET":
         try:
             user = request.user
+            numConsultas=0
 
             if user.is_superuser == 1:
                 consultas = Consulta.objects.all()
+                numConsultas = consultas.count()
             else:
                 consultas = Consulta.objects.filter(veterinario_id=user)
-            
-            #usar paginacao
+                numConsultas = consultas.count()
+
+            # usar paginacao
             consultas_por_pagina = 5  # número de consultas por página
             paginator = Paginator(consultas, consultas_por_pagina)
 
@@ -325,7 +328,7 @@ def consultas(request):
             return render(request, "system/consulta-list.html", {
                 "error_message": "Não possivel carregar os dados.\nErro: {}".format(e)
             })
-    return render(request, "system/consulta-list.html", {'consultas': consultas_da_pagina})
+    return render(request, "system/consulta-list.html", {'consultas': consultas_da_pagina, 'numConsultas':numConsultas})
 
 
 @login_required(login_url='/login')
@@ -438,6 +441,13 @@ def consultaDetails(request, idConsulta):
 def consultaDelete(request, idConsulta):
     consulta = Consulta.objects.get(id=idConsulta)
     try:
+        # Remover a imagem do diretório
+        if consulta.imagem:
+            image_path = os.path.join(settings.STATICFILES_DIRS[0], 'detencao-img', consulta.imagem)
+            if os.path.exists(image_path):
+                os.remove(image_path)
+        
+        # Excluir a consulta do banco de dados
         consulta.delete()
     except Exception as e:
         return redirect('consultas', {'error_message': 'Algo ocorreu mal\nErro: {}'.format(e)})
@@ -458,22 +468,72 @@ def reports(request):
     else:
         consultas = Consulta.objects.filter(veterinario_id=user)
 
-    """ Gráfico de Quantidade de Detenções por Raça """
-    # Extrair as raças das consultas
-    racas = [consulta.raca for consulta in consultas]
+    """ Gráfico de Quantidade de Detenções por Raça e Mês """
+    datasets_json = graficoRacaMes(consultas)
 
-    # Contar a quantidade de detenções por raça
-    contador_racas = Counter(racas)
+    """ Gráfico de Quantidade de Detecções por Mês """
+    nomes_meses, quantidades_meses = graficoQuantidadeDetencoesMes(consultas)
 
-    # Separar as raças e contagens
-    racas = list(contador_racas.keys())
-    quantidades = list(contador_racas.values())
+    """ Gráfico de Quantidade de Detenções por Doenças """
+    doencas, quantidades_doencas = graficoQuantidadeDentencoesDoencas(consultas)
+   
 
-    # Crie uma lista de datasets com rótulos e dados correspondentes
+    return render(request, 'system/reports.html', {
+        "datasets_json": datasets_json,
+        "nomes_meses": json.dumps(nomes_meses),
+        "quantidades_meses": json.dumps(quantidades_meses),
+        "doencas": json.dumps(doencas),
+        "quantidades_doencas": json.dumps(quantidades_doencas),
+    })
+
+
+""" metodos auxiliar """
+
+
+def encontrar_chave_valor(dicionario, valor_procurado):
+    for chave, valor in dicionario.items():
+        if valor.get('nome') == valor_procurado:
+            return chave
+    return None
+
+# Função para gerar uma cor hexadecimal aleatória
+
+
+def cor_aleatoria():
+    return "#{:02x}{:02x}{:02x}".format(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+
+# Função para gerar uma cor RGBA aleatória com um valor de alfa específico
+
+
+def cor_aleatoria_rgba(r, g, b, alpha):
+    return f'rgba({r}, {g}, {b}, {alpha})'
+
+
+""" Gráfico de Quantidade de Detenções por Raça e Mês """
+def graficoRacaMes(consultas):
+    consulta_agrupada = consultas.annotate(
+        month=TruncMonth('created_at')
+    ).values('raca', 'month').annotate(count=Count('id'))
+
+    # Extrair as raças, meses e quantidades
+    dados_grafico = {}
+    for item in consulta_agrupada:
+        raca = item['raca']
+        month = item['month'].strftime('%B %Y')
+        print(f"month: {month}")
+        quantidade = item['count']
+        if raca not in dados_grafico:
+            dados_grafico[raca] = {'meses': [], 'quantidades': []}
+        dados_grafico[raca]['meses'].append(month)
+        dados_grafico[raca]['quantidades'].append(quantidade)
+
+    print(f"dados_grafico: {dados_grafico}")
+
+    # Criar uma lista de datasets com rótulos e dados correspondentes
     datasets = []
 
-    for i, raca in enumerate(racas):
-        #cores
+    for i, raca in enumerate(dados_grafico):
+        # cores
         r = random.randint(0, 255)
         g = random.randint(0, 255)
         b = random.randint(0, 255)
@@ -481,7 +541,7 @@ def reports(request):
         alpha_point = 0.2  # Valor de alfa para pointBackgroundColor
         alpha_legend = 0.1  # Valor de alfa para backgroundColor
         cor = cor_aleatoria()
-        
+
         dataset = {
             'label': f'{raca}',
             'borderColor': cor,  # Cor do gráfico
@@ -491,14 +551,17 @@ def reports(request):
             'legendColor': cor,
             'fill': True,
             'borderWidth': 2,
-            'data': quantidades  # Usar o valor correspondente à raça
+            # Usar o valor correspondente à raça
+            'data': dados_grafico[raca]['quantidades']
         }
         datasets.append(dataset)
 
     # Converter a lista de datasets em uma string JSON para ser usada no JavaScript
     datasets_json = json.dumps(datasets)
+    return datasets_json
 
-    """ Gráfico de Quantidade de Detecções por Mês """
+""" Gráfico de Quantidade de Detecções por Mês """
+def graficoQuantidadeDetencoesMes(consultas):
     # Anotar a data das consultas por mês
     consultas_mes = consultas.annotate(month=TruncMonth('created_at'))
 
@@ -508,13 +571,15 @@ def reports(request):
     # Separar os meses e contagens
     meses = [str(entry['month'].strftime('%Y-%m')) for entry in contador_meses]
 
-    nomes_meses = [datetime.strptime(mes, '%Y-%m').strftime('%b') for mes in meses]
+    nomes_meses = [datetime.strptime(
+        mes, '%Y-%m').strftime('%b') for mes in meses]
 
     quantidades_meses = [entry['count'] for entry in contador_meses]
 
+    return nomes_meses, quantidades_meses
 
-    """ Gráfico de Quantidade de Detenções por Doenças """
-
+""" Gráfico de Quantidade de Detenções por Doenças """
+def graficoQuantidadeDentencoesDoencas(consultas):
     # Extrair as doenças das consultas
     doencas = [consulta.doenca for consulta in consultas]
 
@@ -525,29 +590,4 @@ def reports(request):
     doencas = list(contador_doencas.keys())
     quantidades_doencas = list(contador_doencas.values())
 
-    return render(request, 'system/reports.html',{
-        "datasets_json":datasets_json,
-        "racas":json.dumps(racas),
-        "quantidades":json.dumps(quantidades),
-        "nomes_meses":json.dumps(nomes_meses),
-        "quantidades_meses":json.dumps(quantidades_meses),
-        "doencas":json.dumps(doencas),
-        "quantidades_doencas":json.dumps(quantidades_doencas),
-    })
-
-
-""" metodos auxiliar """
-def encontrar_chave_valor(dicionario, valor_procurado):
-    for chave, valor in dicionario.items():
-        if valor.get('nome') == valor_procurado:
-            return chave
-    return None
-
-# Função para gerar uma cor hexadecimal aleatória
-def cor_aleatoria():
-    return "#{:02x}{:02x}{:02x}".format(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-
-# Função para gerar uma cor RGBA aleatória com um valor de alfa específico
-def cor_aleatoria_rgba(r, g, b, alpha):
-    return f'rgba({r}, {g}, {b}, {alpha})'
-
+    return doencas, quantidades_doencas
