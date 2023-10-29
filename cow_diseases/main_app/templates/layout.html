@@ -65,7 +65,7 @@
 										<i class="fa fa-search search-icon"></i>
 									</button>
 								</div>
-								<input type="search" placeholder="Pesquisar..." class="form-control">
+								<input type="search" name="q" placeholder="Pesquisar..." class="form-control">
 							</div>
 						</form>
 					</div>
@@ -79,13 +79,21 @@
 						<li class="nav-item dropdown hidden-caret">
 							<a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#" aria-expanded="false">
 								<div class="avatar-sm">
-									<img src="{% static 'assets/img/profile.jpg' %}" alt="..." class="avatar-img rounded-circle">
+									{% if user.genero == 'Masculino' %}
+										<img src="{% static 'assets/img/profile.jpg' %}" alt="..." class="avatar-img rounded-circle">
+									{% else %}
+										<img src="{% static 'assets/img/profile-female.jpg' %}" alt="..." class="avatar-img rounded-circle">
+									{% endif %}
 								</div>
 							</a>
 							<ul class="dropdown-menu dropdown-user animated fadeIn">
 								<li>
 									<div class="user-box">
-										<div class="avatar-lg"><img src="{% static 'assets/img/profile.jpg' %}" alt="image profile" class="avatar-img rounded"></div>
+										{% if user.genero == 'Masculino' %}
+											<div class="avatar-lg"><img src="{% static 'assets/img/profile.jpg' %}" alt="image profile" class="avatar-img rounded"></div>
+										{% else %}
+											<div class="avatar-lg"><img src="{% static 'assets/img/profile-female.jpg' %}" alt="image profile" class="avatar-img rounded"></div>
+										{% endif %}
 										<div class="u-text">
 											<h4>{{user.first_name}} {{user.last_name}}</h4>
 											<p class="text-muted">{{user.email}}</p><a href="{% url 'profile' %}" class="btn btn-rounded btn-warning btn-sm">View Profile</a>

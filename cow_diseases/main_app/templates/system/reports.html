@@ -36,19 +36,19 @@
         </div>
         <div class="card-body">
           <div class="chart-container" style="min-height: 375px">
-            <canvas id="statisticsChart"></canvas>
+            <canvas id="detecoesPorRaca"></canvas>
           </div>
           <div id="myChartLegend"></div>
         </div>
       </div>
     </div>
     <div class="col-md-6">
-      <div class="card">
+      <div class="card" style="height: 530px;">
         <div class="card-header">
-          <div class="card-title">Bar Chart</div>
+          <div class="card-title">Quantidade de Detecções por Mês</div>
         </div>
         <div class="card-body">
-          <div class="chart-container">
+          <div class="chart-container" style="min-height: 380px">
             <canvas id="barChart"></canvas>
           </div>
         </div>
@@ -57,10 +57,10 @@
   </div>
 
   <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-12">
       <div class="card">
         <div class="card-header">
-          <div class="card-title">Pie Chart</div>
+          <div class="card-title">Quantidade de Detenções por Previsões</div>
         </div>
         <div class="card-body">
           <div class="chart-container">
@@ -76,7 +76,8 @@
 
 {% block scripts %}
   <script>
-    var ctx = document.getElementById('statisticsChart').getContext('2d');
+    /* Quantidade de Detenções por Raça */
+    var ctx = document.getElementById('detecoesPorRaca').getContext('2d');
 
     var datasets_json = {{datasets_json|safe}}
     var meses = {{nomes_meses|safe}}
@@ -89,7 +90,7 @@
         datasets: datasets_json
     };
 
-    var statisticsChart = new Chart(ctx, {
+    var detecoesPorRaca = new Chart(ctx, {
       type: 'line',
       data: data,
       options : {
@@ -154,6 +155,90 @@
     var myLegendContainer = document.getElementById("myChartLegend");
 
     // generate HTML legend
-    myLegendContainer.innerHTML = statisticsChart.generateLegend();
+    myLegendContainer.innerHTML = detecoesPorRaca.generateLegend();
+
+    /* Quantidade de Detecções por Mês */
+    barChart = document.getElementById('barChart').getContext('2d');
+    var myBarChart = new Chart(barChart, {
+			type: 'bar',
+			data: {
+				labels: meses,
+				datasets : [{
+					label: " Detecções por Mês",
+					backgroundColor: 'rgb(23, 125, 255)',
+					borderColor: 'rgb(23, 125, 255)',
+					data: quantidades_meses,
+				}],
+			},
+			options: {
+				responsive: true, 
+				maintainAspectRatio: false,
+				scales: {
+					yAxes: [{
+						ticks: {
+							beginAtZero:true
+						}
+					}]
+				},
+			}
+		});
+
+    /* Quantidade de Detenções por Previsões */
+    function corAleatoria() {
+      var cor = '#';
+      var caracteres = '0123456789ABCDEF';
+      for (var i = 0; i < 6; i++) {
+          cor += caracteres[Math.floor(Math.random() * 16)];
+      }
+      return cor;
+    }
+
+    function gerarCoresAleatorias(quantidade) {
+      var cores = [];
+      for (var i = 0; i < quantidade; i++) {
+          cores.push(corAleatoria());
+      }
+      return cores;
+    }
+
+    var myPieChart = new Chart(pieChart, {
+			type: 'pie',
+			data: {
+				datasets: [{
+					data: quantidades_doencas,
+					backgroundColor: gerarCoresAleatorias(quantidades_doencas.length),
+					borderWidth: 0
+				}],
+				labels: doencas 
+			},
+			options : {
+				responsive: true, 
+				maintainAspectRatio: false,
+				legend: {
+					position : 'bottom',
+					labels : {
+						fontColor: 'rgb(154, 154, 154)',
+						fontSize: 11,
+						usePointStyle : true,
+						padding: 20
+					}
+				},
+				pieceLabel: {
+					render: 'percentage',
+					fontColor: 'white',
+					fontSize: 14,
+				},
+				tooltips: false,
+				layout: {
+					padding: {
+						left: 20,
+						right: 20,
+						top: 20,
+						bottom: 20
+					}
+				}
+			}
+		})
+    
   </script>
 {% endblock %}

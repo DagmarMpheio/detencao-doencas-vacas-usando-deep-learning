@@ -231,18 +231,17 @@ def profile(request):
     user = request.user
     numConsultas = 0
 
+    if user.is_superuser == 1:
+        numConsultas = Consulta.objects.all().count()
+
     if user.consultas.all().count() > 0:
         numConsultas = user.consultas.all().count()
-
-    return render(request, "user/profile.html", {'numConsultas': numConsultas})
-
-
-@login_required(login_url='/login')
-def update_profile(request):
-    user = request.user
+    
     form = UserForm(initial={'first_name': user.first_name,
-                    'last_name': user.last_name, 'email': user.email})
-
+                    'last_name': user.last_name, 'email': user.email,"telefone":user.telefone,
+                    "data_nascimento":user.data_nascimento,"genero":user.genero,"endereco":user.endereco,"bio":user.bio
+        })
+    
     if request.method == "POST":
 
         form = UserForm(request.POST, instance=user)
@@ -258,22 +257,26 @@ def update_profile(request):
             except Exception as e:
                 messages.error(request, 'Algo ocorreu mal\nErro: {}'.format(e))
                 return redirect('/profile')
-    return render(request, "user/edit-profile.html", {'form': form})
+
+    return render(request, "user/profile.html", {'numConsultas': numConsultas, 'form':form})
+
 
 # metodo de pesquisa
-
-
 @login_required(login_url='/login')
 def search_view(request):
     query = request.GET.get('q')
 
     user = request.user
+
+    if user.is_superuser == 1:
+        consultas = Consulta.objects.all()
+
     consultas = user.consultas.all()
 
     results = consultas.filter(raca__icontains=query)
     resultTotal = results.count()
 
-    return render(request, "system/search-results.html", {'results': results, 'resultTotal': resultTotal})
+    return render(request, "system/search-results.html", {'query':query,'results': results, 'resultTotal': resultTotal})
 
 
 """ Extensões permitidas """
@@ -292,8 +295,12 @@ def allowed_file(filename):
 def consultas(request):
     if request.method == "GET":
         try:
-            veterinario = request.user
-            consultas = Consulta.objects.filter(veterinario_id=veterinario)
+            user = request.user
+
+            if user.is_superuser == 1:
+                consultas = Consulta.objects.all()
+
+            consultas = Consulta.objects.filter(veterinario_id=user)
 
             """ # paginacao de 5 elementos por paginas
             paginator = Paginator(consultas, 5)
@@ -323,9 +330,6 @@ def consultaCreate(request):
             # Resto do código...
         else:
             print("Nenhuma imagem recebida no formulário.")
-
-        print(f"raca {raca}")
-        print(f"imagem {imagem}")
 
         # Caminho para a pasta onde você deseja copiar a imagem
         destino = os.path.join(settings.STATIC_ROOT, 'static', 'detencao-img')
@@ -385,7 +389,7 @@ def consultaCreate(request):
             veterinario=request.user, raca=raca, imagem=imagem, doenca=doenca_nome,
             probabilidade=round(prob, 2), status=status)
 
-        messages.success(request, 'Previsão Efectuado com Sucesso')
+        messages.success(request, 'Previsão Efectuada com Sucesso')
 
         # return redirect('consultas')
         return redirect('/consulta-details/{}'.format(consulta.id))
@@ -435,8 +439,12 @@ def consultaDelete(request, idConsulta):
 @login_required(login_url='/login')
 def reports(request):
     # Obter os dados das consultas
-    veterinario = request.user
-    consultas = Consulta.objects.filter(veterinario_id=veterinario)
+    user = request.user
+
+    if user.is_superuser == 1:
+        consultas = Consulta.objects.all()
+
+    consultas = Consulta.objects.filter(veterinario_id=user)
 
     """ Gráfico de Quantidade de Detenções por Raça """
     # Extrair as raças das consultas
@@ -505,9 +513,6 @@ def reports(request):
     doencas = list(contador_doencas.keys())
     quantidades_doencas = list(contador_doencas.values())
 
-    print(f"doencas: {doencas}")
-    print(f"quantidades: {quantidades_doencas}")
-
     return render(request, 'system/reports.html',{
         "datasets_json":datasets_json,
         "racas":json.dumps(racas),
@@ -519,7 +524,7 @@ def reports(request):
     })
 
 
-# metodo auxiliar
+""" metodos auxiliar """
 def encontrar_chave_valor(dicionario, valor_procurado):
     for chave, valor in dicionario.items():
         if valor.get('nome') == valor_procurado:

@@ -8,7 +8,11 @@
         <div class="sidebar-content">
             <div class="user">
                 <div class="avatar-sm float-left mr-2">
-                    <img src="{% static 'assets/img/profile.jpg' %}" alt="..." class="avatar-img rounded-circle">
+                    {% if user.genero == 'Masculino' %}
+                        <img src="{% static 'assets/img/profile.jpg' %}" alt="..." class="avatar-img rounded-circle">
+                    {% else %}
+                        <img src="{% static 'assets/img/profile-female.jpg' %}" alt="..." class="avatar-img rounded-circle">
+                    {% endif %}
                 </div>
                 <div class="info">
                     <a data-toggle="collapse" href="#collapseExample" aria-expanded="true">
@@ -29,11 +33,6 @@
                             <li>
                                 <a href="{% url 'profile' %}">
                                     <span class="link-collapse">Meu Perfil</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{% url 'edit-profile' %}">
-                                    <span class="link-collapse">Editar Perfil</span>
                                 </a>
                             </li>
                         </ul>
