@@ -29,26 +29,25 @@
             </ul>
           </div>
         <div class="row">
-
-            {% if messages %}
-                {% for message in messages %}
-                    {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                        <!--SUCCESS MESSAGE-->
-                        <div class="alert alert-success">
-                            {{message}}
-                        </div>
-                    {% endif %}
-
-                    {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
-                        <!--ERROR MESSAGE-->
-                        <div class="alert alert-danger">
-                            {{message}}
-                        </div>
-                    {% endif %}
-                {% endfor %} 
-		    {% endif %}
-            
             <div class="col-md-8">
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                            <!--SUCCESS MESSAGE-->
+                            <div class="alert alert-success">
+                                {{message}}
+                            </div>
+                        {% endif %}
+
+                        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                            <!--ERROR MESSAGE-->
+                            <div class="alert alert-danger">
+                                {{message}}
+                            </div>
+                        {% endif %}
+                    {% endfor %} 
+		        {% endif %}
+
                 <div class="card card-post card-round">
                     <img class="card-img-top" src="/static/detencao-img/{{consulta.imagem}}" alt="Imagem da Detectada" height="250" width="100%">
                     <div class="card-body">

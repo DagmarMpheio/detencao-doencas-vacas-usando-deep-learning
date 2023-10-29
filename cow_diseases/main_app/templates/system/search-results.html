@@ -31,43 +31,79 @@
                 {% else %}
                     <div class="card">
                         <div class="card-header">
-                        <div class="card-title">Lista de Consultas</div>
+                        <div class="card-title">Resultados da Pesquisa com: <b>{{query}}</b></div>
                         </div>
                         <div class="card-body table-responsive">
-                        <table class="table table-head-bg-success">
-                            <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Raça</th>
-                                <th scope="col">Previsão</th>
-                                <th scope="col">Probabilidade</th>
-                                <th scope="col">Data</th>
-                                <th scope="col">Operações</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for result in results %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ result.raca }}</td>
-                                <td>{{ result.doenca }}</td>
-                                <td>{{ result.probabilidade }} %</td>
-                                <td>{{ result.created_at | date:"F j, Y" }}</td>
-                                <td>
+                            <table class="table table-head-bg-success">
+                                <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Raça</th>
+                                    <th scope="col">Previsão</th>
+                                    <th scope="col">Probabilidade</th>
+                                    <th scope="col">Data</th>
+                                    <th scope="col">Operações</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for result in results %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ result.raca }}</td>
+                                    <td>{{ result.doenca }}</td>
+                                    <td>{{ result.probabilidade }} %</td>
+                                    <td>{{ result.created_at | date:"F j, Y" }}</td>
+                                    <td>
+                                    <div class="row">
+                                        <a href="{% url 'consulta-details' result.id %}" title="Detalhes" class="btn btn-icon btn-round btn-warning mx-2" style="display: flex; justify-content: center; align-items: center;">
+                                        <i class="fa fa-info"></i>
+                                        </a>
+                                        <a href="{% url 'consulta-delete' result.id %}" title="Excluir" type="button" class="btn btn-icon btn-round btn-danger" style="display: flex; justify-content: center; align-items: center;">
+                                        <i class="fa fa-trash"></i>
+                                        </a>
+                                    </div>
+                                            </td>
+                                    
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+
+                            <div class="mx-4">
                                 <div class="row">
-                                    <a href="{% url 'consulta-details' result.id %}" title="Detalhes" class="btn btn-icon btn-round btn-warning mx-2" style="display: flex; justify-content: center; align-items: center;">
-                                    <i class="fa fa-info"></i>
-                                    </a>
-                                    <a href="{% url 'consulta-delete' result.id %}" title="Excluir" type="button" class="btn btn-icon btn-round btn-danger" style="display: flex; justify-content: center; align-items: center;">
-                                    <i class="fa fa-trash"></i>
-                                    </a>
+                                    <p class="text-lg">{{resultTotal}} resultado(s) encontrados</p>
                                 </div>
-                                        </td>
+                            </div>
+
+                            <!-- Adicionar paginacao -->
+                            <nav aria-label="...">
+                                <ul class="pagination pg-success mb-0">
+                                {% if results.has_previous %}
+                                    <li class="page-item">
+                                    <a class="page-link" href="?q={{query}}&pagina=1" tabindex="-1">Primeira</a>
+                                    </li>
+                                    <li class="page-item">
+                                    <a class="page-link" href="?q={{query}}&pagina={{ results.previous_page_number }}">Anterior</a>
+                                    </li>
+                                {% endif %}
                                 
-                            </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
+                                {% for page in results.paginator.page_range %}
+                                    <li class="page-item {% if page == results.number %}active{% endif %}">
+                                    <a class="page-link" href="?q={{query}}&pagina={{ page }}">{{ page }}{% if page == results.number %}<span class="sr-only">(actual)</span>{% endif %}</a>
+                                    </li>
+                                {% endfor %}
+                                
+                                {% if results.has_next %}
+                                    <li class="page-item">
+                                    <a class="page-link" href="?q={{query}}&pagina={{ results.next_page_number }}">Próxima</a>
+                                    </li>
+                                    <li class="page-item">
+                                    <a class="page-link" href="?q={{query}}&pagina={{ results.paginator.num_pages }}">Última</a>
+                                    </li>
+                                {% endif %}
+                                </ul>
+                            </nav>
+
                         </div>
                     </div>
                   {% endif %}

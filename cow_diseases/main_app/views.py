@@ -33,6 +33,9 @@ import json
 import random
 from datetime import datetime
 
+#paginacao
+from django.core.paginator import Paginator
+
 # Create your views here.
 
 # Dicionário de doenças com números como chaves e descrições
@@ -230,12 +233,14 @@ def index(request):
 def profile(request):
     user = request.user
     numConsultas = 0
+    numUsers = 0
 
     if user.is_superuser == 1:
         numConsultas = Consulta.objects.all().count()
-
-    if user.consultas.all().count() > 0:
-        numConsultas = user.consultas.all().count()
+        numUsers = User.objects.all().count()
+    else:
+        if user.consultas.all().count() > 0:
+            numConsultas = user.consultas.all().count()
     
     form = UserForm(initial={'first_name': user.first_name,
                     'last_name': user.last_name, 'email': user.email,"telefone":user.telefone,
@@ -258,7 +263,7 @@ def profile(request):
                 messages.error(request, 'Algo ocorreu mal\nErro: {}'.format(e))
                 return redirect('/profile')
 
-    return render(request, "user/profile.html", {'numConsultas': numConsultas, 'form':form})
+    return render(request, "user/profile.html", {'numConsultas': numConsultas, 'numUsers':numUsers, 'form':form})
 
 
 # metodo de pesquisa
@@ -270,13 +275,20 @@ def search_view(request):
 
     if user.is_superuser == 1:
         consultas = Consulta.objects.all()
-
-    consultas = user.consultas.all()
+    else:
+        consultas = user.consultas.all()
 
     results = consultas.filter(raca__icontains=query)
     resultTotal = results.count()
 
-    return render(request, "system/search-results.html", {'query':query,'results': results, 'resultTotal': resultTotal})
+    #usar paginacao
+    results_por_pagina = 5  # número de consultas por página
+    paginator = Paginator(results, results_por_pagina)
+
+    pagina = request.GET.get('pagina')
+    results_da_pagina = paginator.get_page(pagina)
+
+    return render(request, "system/search-results.html", {'query':query,'results': results_da_pagina, 'resultTotal': resultTotal})
 
 
 """ Extensões permitidas """
@@ -299,21 +311,21 @@ def consultas(request):
 
             if user.is_superuser == 1:
                 consultas = Consulta.objects.all()
+            else:
+                consultas = Consulta.objects.filter(veterinario_id=user)
+            
+            #usar paginacao
+            consultas_por_pagina = 5  # número de consultas por página
+            paginator = Paginator(consultas, consultas_por_pagina)
 
-            consultas = Consulta.objects.filter(veterinario_id=user)
-
-            """ # paginacao de 5 elementos por paginas
-            paginator = Paginator(consultas, 5)
-            page_number = request.GET.get("page")
-            pag_obj = paginator.get_page(page_number)
-
-            context_consultas = {'consultas': consultas, 'page_obj': pag_obj} """
+            pagina = request.GET.get('pagina')
+            consultas_da_pagina = paginator.get_page(pagina)
 
         except Exception as e:
             return render(request, "system/consulta-list.html", {
                 "error_message": "Não possivel carregar os dados.\nErro: {}".format(e)
             })
-    return render(request, "system/consulta-list.html", {'consultas': consultas})
+    return render(request, "system/consulta-list.html", {'consultas': consultas_da_pagina})
 
 
 @login_required(login_url='/login')
@@ -443,8 +455,8 @@ def reports(request):
 
     if user.is_superuser == 1:
         consultas = Consulta.objects.all()
-
-    consultas = Consulta.objects.filter(veterinario_id=user)
+    else:
+        consultas = Consulta.objects.filter(veterinario_id=user)
 
     """ Gráfico de Quantidade de Detenções por Raça """
     # Extrair as raças das consultas

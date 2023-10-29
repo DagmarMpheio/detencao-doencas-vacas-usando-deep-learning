@@ -52,7 +52,10 @@
             <thead>
               <tr>
                 <th scope="col">#</th>
-                <th scope="col">Raça</th>
+                {% if user.is_superuser == 1%}
+                  <th scope="col">Veterinário</th>
+                {% endif %}
+                <th scope="col">Raça do Gado</th>
                 <th scope="col">Previsão</th>
                 <th scope="col">Probabilidade</th>
                 <th scope="col">Data</th>
@@ -63,6 +66,9 @@
               {% for consulta in consultas %}
               <tr>
                 <td>{{ forloop.counter }}</td>
+                {% if user.is_superuser == 1%}
+                  <td>{{ consulta.veterinario.first_name }}</td>
+                {% endif %}
                 <td>{{ consulta.raca }}</td>
                 <td>{{ consulta.doenca }}</td>
                 <td>{{ consulta.probabilidade }} %</td>
@@ -82,6 +88,36 @@
               {% endfor %}
             </tbody>
           </table>
+
+          <!-- Adicionar paginacao -->
+          <nav aria-label="...">
+            <ul class="pagination pg-success mb-0">
+              {% if consultas.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?pagina=1" tabindex="-1">Primeira</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="?pagina={{ consultas.previous_page_number }}">Anterior</a>
+                </li>
+              {% endif %}
+              
+              {% for page in consultas.paginator.page_range %}
+                <li class="page-item {% if page == consultas.number %}active{% endif %}">
+                  <a class="page-link" href="?pagina={{ page }}">{{ page }}{% if page == consultas.number %}<span class="sr-only">(actual)</span>{% endif %}</a>
+                </li>
+              {% endfor %}
+              
+              {% if consultas.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?pagina={{ consultas.next_page_number }}">Próxima</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="?pagina={{ consultas.paginator.num_pages }}">Última</a>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+
         </div>
       </div>
       {% endif %}
